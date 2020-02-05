@@ -109,6 +109,9 @@ void AHouseWarriorsCharacter::MoveForward(float Value)
 {
 	if ((Controller != NULL) && (Value != 0.0f))
 	{
+		//Set follow camera use yaw
+		bUseControllerRotationYaw = true;
+
 		// find out which way is forward
 		const FRotator Rotation = Controller->GetControlRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
@@ -116,6 +119,11 @@ void AHouseWarriorsCharacter::MoveForward(float Value)
 		// get forward vector
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 		AddMovementInput(Direction, Value);
+	}
+
+	if (Value == 0.0f) {
+		//Set follow camera not use Yaw
+		bUseControllerRotationYaw = false;
 	}
 }
 
@@ -131,5 +139,6 @@ void AHouseWarriorsCharacter::MoveRight(float Value)
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 		// add movement in that direction
 		AddMovementInput(Direction, Value);
+		AddControllerYawInput(Value * BaseTurnRate * GetWorld()->GetDeltaSeconds());
 	}
 }
