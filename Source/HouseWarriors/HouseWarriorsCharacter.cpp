@@ -21,6 +21,10 @@ AHouseWarriorsCharacter::AHouseWarriorsCharacter()
 	BaseTurnRate = 45.f;
 	BaseLookUpRate = 45.f;
 
+	// set our run and walk speeds
+	RunSpeed = 250.0f;
+	WalkSpeed = 150.0f;
+
 	// Don't rotate when the controller rotates. Let that just affect the camera.
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = true;
@@ -31,6 +35,7 @@ AHouseWarriorsCharacter::AHouseWarriorsCharacter()
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 540.0f, 0.0f); // ...at this rotation rate
 	GetCharacterMovement()->JumpZVelocity = 300.f;
 	GetCharacterMovement()->AirControl = 0.2f;
+	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 
 	// Create a camera boom (pulls in towards the player if there is a collision)
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
@@ -57,6 +62,9 @@ void AHouseWarriorsCharacter::SetupPlayerInputComponent(class UInputComponent* P
 	check(PlayerInputComponent);
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
+	
+	PlayerInputComponent->BindAction("Run", IE_Pressed, this, &AHouseWarriorsCharacter::Run);
+	PlayerInputComponent->BindAction("Run", IE_Released, this, &AHouseWarriorsCharacter::RunStop);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &AHouseWarriorsCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AHouseWarriorsCharacter::MoveRight);
@@ -141,4 +149,14 @@ void AHouseWarriorsCharacter::MoveRight(float Value)
 		AddMovementInput(Direction, Value);
 		AddControllerYawInput(Value * BaseTurnRate * GetWorld()->GetDeltaSeconds());
 	}
+}
+
+void AHouseWarriorsCharacter::Run()
+{
+	GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
+}
+
+void AHouseWarriorsCharacter::RunStop()
+{
+	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 }

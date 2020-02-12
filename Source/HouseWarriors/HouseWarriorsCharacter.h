@@ -40,6 +40,10 @@ protected:
 	/** Called for side to side input */
 	void MoveRight(float Value);
 
+	/* Called for faster movement input*/
+	void Run();
+	void RunStop();
+
 	/** 
 	 * Called via input to turn at a given rate. 
 	 * @param Rate	This is a normalized rate, i.e. 1.0 means 100% of desired turn rate
@@ -57,6 +61,14 @@ protected:
 
 	/** Handler for when a touch input stops. */
 	void TouchStopped(ETouchIndex::Type FingerIndex, FVector Location);
+
+	/** The target ground speed when running. */
+	UPROPERTY(Category = "Character Movement: Walking", EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "0", UIMin = "0"))
+		float RunSpeed;
+
+	/** The target ground speed when walking slowly. */
+	UPROPERTY(Category = "Character Movement: Walking", EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "0", UIMin = "0"))
+		float WalkSpeed;
 
 protected:
 	// APawn interface
