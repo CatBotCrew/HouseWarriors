@@ -22,11 +22,11 @@ public:
 	AHouseWarriorsCharacter();
 
 	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Camera)
 	float BaseTurnRate;
 
 	/** Base look up/down rate, in deg/sec. Other scaling may affect final rate. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Camera)
 	float BaseLookUpRate;
 
 protected:
@@ -43,6 +43,9 @@ protected:
 	/* Called for faster movement input*/
 	void Run();
 	void RunStop();
+
+	/*Called for interacting with specific objects in the scene*/
+	void InteractPressed();
 
 	/** 
 	 * Called via input to turn at a given rate. 
@@ -70,10 +73,36 @@ protected:
 	UPROPERTY(Category = "Character Movement: Walking", EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "0", UIMin = "0"))
 		float WalkSpeed;
 
+	/** The trace channel distance */
+	UPROPERTY(Category = "Interaction", EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "0", UIMin = "0"))
+		float TraceDistance;
+
+	UFUNCTION(BlueprintCallable, Category = "Interaction")
+		void Interact_Implementation();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Interaction")
+		void Activate_Implementation(const AActor* ActorHit);
+
+	UFUNCTION(BlueprintNativeEvent, Category = "Interaction")
+		void OnHover();
+		void OnHover_Implementation();
+
+
 protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	// End of APawn interface
+
+private:
+	/*booleans for use in this h & cpp and not anywhere else*/
+	bool bHitObject;
+
+	/*Trace by channel*/
+	FVector Start;
+	FVector End;
+	AActor* Interactable;
+	FHitResult Hit;
+	AActor* FocusedInteractable;
 
 public:
 	/** Returns CameraBoom subobject **/
