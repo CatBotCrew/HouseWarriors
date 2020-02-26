@@ -8,6 +8,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "DrawDebugHelpers.h"
 
 //////////////////////////////////////////////////////////////////////////
 // AHouseWarriorsCharacter
@@ -22,8 +23,12 @@ AHouseWarriorsCharacter::AHouseWarriorsCharacter()
 	BaseLookUpRate = 45.f;
 
 	// set our run and walk speeds
-	RunSpeed = 250.0f;
-	WalkSpeed = 150.0f;
+	RunSpeed = 200.0f;
+	WalkSpeed = 100.0f;
+
+	//Other settings
+	bHitObject = false;
+	TraceDistance = 1000.0f;
 
 	// Don't rotate when the controller rotates. Let that just affect the camera.
 	bUseControllerRotationPitch = false;
@@ -65,6 +70,8 @@ void AHouseWarriorsCharacter::SetupPlayerInputComponent(class UInputComponent* P
 	
 	PlayerInputComponent->BindAction("Run", IE_Pressed, this, &AHouseWarriorsCharacter::Run);
 	PlayerInputComponent->BindAction("Run", IE_Released, this, &AHouseWarriorsCharacter::RunStop);
+
+	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &AHouseWarriorsCharacter::InteractPressed);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &AHouseWarriorsCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AHouseWarriorsCharacter::MoveRight);
@@ -159,4 +166,37 @@ void AHouseWarriorsCharacter::Run()
 void AHouseWarriorsCharacter::RunStop()
 {
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+}
+
+void AHouseWarriorsCharacter::InteractPressed()
+{
+	if (bHitObject) {
+		AActor* Interactable = Hit.GetActor();
+
+		if (Interactable->ActorHasTag("Activator")) {
+			//DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 2.0f);
+			Activate_Implementation(Interactable);
+			OnHover();
+		}
+	}
+}
+
+void AHouseWarriorsCharacter::Interact_Implementation()
+{
+	FVector Location;
+	FRotator Rotation;
+
+	GetController()->GetPlayerViewPoint(Location, Rotation);
+
+	Start = Location;
+	End = Start + (Rotation.Vector() * TraceDistance);
+
+	FCollisionQueryParams TraceParams;
+	bHitObject = GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility, TraceParams);
+	//DrawDebugLine(GetWorld(), Start, End, FColor::Cyan, false, 1.0f);
+}
+
+void AHouseWarriorsCharacter::OnHover_Implementation()
+{
+	/*TODO: implement shaking or something if needed here in code then call parent else instead implement in bp*/
 }
