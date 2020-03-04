@@ -21,15 +21,51 @@ class AHouseWarriorsCharacter : public ACharacter
 public:
 	AHouseWarriorsCharacter();
 
+protected:
+
 	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Camera)
-	float BaseTurnRate;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
+		float BaseTurnRate;
 
 	/** Base look up/down rate, in deg/sec. Other scaling may affect final rate. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Camera)
-	float BaseLookUpRate;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
+		float BaseLookUpRate;
 
-protected:
+	/*Camera movement pitch settings*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
+		float DynamicPitchMax;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
+		float DynamicPitchMin;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
+		float StaticPitchMin;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
+		float StaticPitchMax;
+
+	/*Health implementation settings*/
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = HealthDebug)
+		float RegenTimer;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = HealthDebug)
+		float CountDownUntilRegen;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = HealthDebug)
+		int Health;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Health)
+		float MaxHealth; 
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Health)
+		float MaxRegenTimer;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Health)
+		float MaxCountDownUntilRegen;
+
+	/*This variable is used for how much health you get back over time while regenerating*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Health)
+		int HealthPlusPerSeconds;
 
 	/** Resets HMD orientation in VR. */
 	void OnResetVR();
@@ -46,6 +82,9 @@ protected:
 
 	/*Called for interacting with specific objects in the scene*/
 	void InteractPressed();
+
+	/*Health regeneration over time*/
+	void RegenerateHealth(float deltaTime);
 
 	/** 
 	 * Called via input to turn at a given rate. 
@@ -80,8 +119,21 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "Interaction")
 		void Interact_Implementation();
 
+	UFUNCTION(BlueprintCallable, Category = "Health")
+		void CanRegenerateHealth(float deltaTime);
+
+	UFUNCTION(BlueprintCallable, Category = "Health")
+		void DealDamage(int damageAmount);
+
+	UFUNCTION(BlueprintNativeEvent, Category = "Health")
+		void OnDeath();
+		void OnDeath_Implementation();
+
 	UFUNCTION(BlueprintImplementableEvent, Category = "Interaction")
 		void Activate_Implementation(const AActor* ActorHit);
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Camera")
+		void ChangeCameraMovementContraints(const float& pitchMin, const float& pitchMax);
 
 	UFUNCTION(BlueprintNativeEvent, Category = "Interaction")
 		void OnHover();
@@ -96,6 +148,7 @@ protected:
 private:
 	/*booleans for use in this h & cpp and not anywhere else*/
 	bool bHitObject;
+	bool bIsRegeneratingHealth;
 
 	/*Trace by channel*/
 	FVector Start;

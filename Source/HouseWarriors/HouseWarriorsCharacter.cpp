@@ -9,6 +9,9 @@
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "DrawDebugHelpers.h"
+#include <EngineGlobals.h>
+#include <Runtime/Engine/Classes/Engine/Engine.h>
+#include "Kismet/GameplayStatics.h"
 
 //////////////////////////////////////////////////////////////////////////
 // AHouseWarriorsCharacter
@@ -28,7 +31,19 @@ AHouseWarriorsCharacter::AHouseWarriorsCharacter()
 
 	//Other settings
 	bHitObject = false;
+	bIsRegeneratingHealth = false;
+	MaxHealth = 100;
+	MaxRegenTimer = 10.0f; //in seconds
+	MaxCountDownUntilRegen = 20.0f; //in seconds
+	Health = MaxHealth;
+	RegenTimer = 0.0f; //in seconds
+	CountDownUntilRegen = MaxCountDownUntilRegen; //in seconds
+	HealthPlusPerSeconds = 10;
 	TraceDistance = 1000.0f;
+	DynamicPitchMin = -20.0f;
+	DynamicPitchMax = 10.0f;
+	StaticPitchMin = -80.0f;
+	StaticPitchMax = 40.0f;
 
 	// Don't rotate when the controller rotates. Let that just affect the camera.
 	bUseControllerRotationPitch = false;
@@ -126,6 +141,7 @@ void AHouseWarriorsCharacter::MoveForward(float Value)
 	{
 		//Set follow camera use yaw
 		bUseControllerRotationYaw = true;
+		ChangeCameraMovementContraints(DynamicPitchMin, DynamicPitchMax);
 
 		// find out which way is forward
 		const FRotator Rotation = Controller->GetControlRotation();
@@ -139,6 +155,7 @@ void AHouseWarriorsCharacter::MoveForward(float Value)
 	if (Value == 0.0f) {
 		//Set follow camera not use Yaw
 		bUseControllerRotationYaw = false;
+		ChangeCameraMovementContraints(StaticPitchMin, StaticPitchMax);
 	}
 }
 
@@ -181,6 +198,21 @@ void AHouseWarriorsCharacter::InteractPressed()
 	}
 }
 
+void AHouseWarriorsCharacter::RegenerateHealth(float deltaTime)
+{
+	RegenTimer -= deltaTime;
+	if (RegenTimer <= 0.0f) {
+		Health += HealthPlusPerSeconds;
+		RegenTimer = MaxRegenTimer;
+		if (Health >= MaxHealth) {
+			bIsRegeneratingHealth = false;
+			Health = MaxHealth;
+			CountDownUntilRegen = MaxCountDownUntilRegen;
+			RegenTimer = 0.0f;
+		}
+	}
+}
+
 void AHouseWarriorsCharacter::Interact_Implementation()
 {
 	FVector Location;
@@ -194,6 +226,36 @@ void AHouseWarriorsCharacter::Interact_Implementation()
 	FCollisionQueryParams TraceParams;
 	bHitObject = GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility, TraceParams);
 	//DrawDebugLine(GetWorld(), Start, End, FColor::Cyan, false, 1.0f);
+}
+
+void AHouseWarriorsCharacter::CanRegenerateHealth(float deltaTime)
+{
+	if (bIsRegeneratingHealth == true) {
+		CountDownUntilRegen -= deltaTime;
+		if (CountDownUntilRegen <= 0.0f) {
+			RegenerateHealth(deltaTime);
+		}
+	}
+}
+
+void AHouseWarriorsCharacter::DealDamage(int damageAmount)
+{
+	Health -= damageAmount;
+	if (Health <= 0) {
+		OnDeath();
+	}
+	else {
+		bIsRegeneratingHealth = true;
+		CountDownUntilRegen = MaxCountDownUntilRegen; //making sure it gets reset if the player gets damaged again.
+		RegenTimer = 0.0f;
+	}
+}
+
+void AHouseWarriorsCharacter::OnDeath_Implementation()
+{
+	Health = MaxHealth;
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Fuckka You, You Dead!"));
+	UGameplayStatics::OpenLevel(this, FName(*GetWorld()->GetName()), false); //reloads current level
 }
 
 void AHouseWarriorsCharacter::OnHover_Implementation()
