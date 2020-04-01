@@ -125,6 +125,9 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "Health")
 		void DealDamage(int damageAmount);
 
+	UFUNCTION(BlueprintCallable, Category = "UI")
+		void UIHealth(float& uiValue, float& isActivated);
+
 	UFUNCTION(BlueprintNativeEvent, Category = "Health")
 		void OnDeath();
 		void OnDeath_Implementation();
@@ -149,6 +152,9 @@ private:
 	/*booleans for use in this h & cpp and not anywhere else*/
 	bool bHitObject;
 	bool bIsRegeneratingHealth;
+
+	/*private float values*/
+	float currentUIValue;
 
 	/*Trace by channel*/
 	FVector Start;

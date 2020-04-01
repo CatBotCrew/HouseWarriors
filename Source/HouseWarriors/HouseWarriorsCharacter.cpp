@@ -44,6 +44,7 @@ AHouseWarriorsCharacter::AHouseWarriorsCharacter()
 	DynamicPitchMax = 10.0f;
 	StaticPitchMin = -80.0f;
 	StaticPitchMax = 40.0f;
+	currentUIValue = 0.0f;
 
 	// Don't rotate when the controller rotates. Let that just affect the camera.
 	bUseControllerRotationPitch = false;
@@ -248,6 +249,18 @@ void AHouseWarriorsCharacter::DealDamage(int damageAmount)
 		bIsRegeneratingHealth = true;
 		CountDownUntilRegen = MaxCountDownUntilRegen; //making sure it gets reset if the player gets damaged again.
 		RegenTimer = 0.0f;
+	}
+}
+
+void AHouseWarriorsCharacter::UIHealth(float& uiValue, float& isActivated)
+{	
+	if (bIsRegeneratingHealth) {
+		isActivated = 1.0f;
+		uiValue = (((Health - 0) * (5 - 0)) / (100 - 0)) + 0;
+	}
+	else {
+		uiValue = 5.0f;
+		isActivated = 0.0f;
 	}
 }
 
