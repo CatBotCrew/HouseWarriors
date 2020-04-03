@@ -64,6 +64,7 @@ AHouseWarriorsCharacter::AHouseWarriorsCharacter()
 	CameraBoom->TargetArmLength = 210.0f; // The camera follows at this distance behind the character	
 	CameraBoom->bUsePawnControlRotation = true; // Rotate the arm based on the controller
 	CameraBoom->bEnableCameraLag = true; //Enable or Disable camera lag behind the character
+	CameraBoom->bAbsoluteRotation = false; // 'true' will set the Camera Boom to rotate independently from its parent (this also means inheritance will not be applied, even if set to 'true').
 
 	// Create a follow camera
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
@@ -164,6 +165,7 @@ void AHouseWarriorsCharacter::MoveRight(float Value)
 {
 	if ( (Controller != NULL) && (Value != 0.0f) )
 	{
+		bUseControllerRotationYaw = true;
 		// find out which way is right
 		const FRotator Rotation = Controller->GetControlRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
