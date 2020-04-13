@@ -40,15 +40,11 @@ AHouseWarriorsCharacter::AHouseWarriorsCharacter()
 	CountDownUntilRegen = MaxCountDownUntilRegen; //in seconds
 	HealthPlusPerSeconds = 10;
 	TraceDistance = 1000.0f;
-	DynamicPitchMin = -20.0f;
-	DynamicPitchMax = 10.0f;
-	StaticPitchMin = -80.0f;
-	StaticPitchMax = 40.0f;
 	currentUIValue = 0.0f;
 
 	// Don't rotate when the controller rotates. Let that just affect the camera.
 	bUseControllerRotationPitch = false;
-	bUseControllerRotationYaw = true;
+	bUseControllerRotationYaw = false;
 	bUseControllerRotationRoll = true;
 
 	// Configure character movement
@@ -61,10 +57,9 @@ AHouseWarriorsCharacter::AHouseWarriorsCharacter()
 	// Create a camera boom (pulls in towards the player if there is a collision)
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
-	CameraBoom->TargetArmLength = 210.0f; // The camera follows at this distance behind the character	
+	CameraBoom->TargetArmLength = 350.0f; // The camera follows at this distance behind the character	
 	CameraBoom->bUsePawnControlRotation = true; // Rotate the arm based on the controller
 	CameraBoom->bEnableCameraLag = true; //Enable or Disable camera lag behind the character
-	CameraBoom->bAbsoluteRotation = false; // 'true' will set the Camera Boom to rotate independently from its parent (this also means inheritance will not be applied, even if set to 'true').
 
 	// Create a follow camera
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
@@ -96,10 +91,10 @@ void AHouseWarriorsCharacter::SetupPlayerInputComponent(class UInputComponent* P
 	// We have 2 versions of the rotation bindings to handle different kinds of devices differently
 	// "turn" handles devices that provide an absolute delta, such as a mouse.
 	// "turnrate" is for devices that we choose to treat as a rate of change, such as an analog joystick
-	PlayerInputComponent->BindAxis("Turn", this, &APawn::AddControllerYawInput);
+	/*PlayerInputComponent->BindAxis("Turn", this, &APawn::AddControllerYawInput);
 	PlayerInputComponent->BindAxis("TurnRate", this, &AHouseWarriorsCharacter::TurnAtRate);
 	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
-	PlayerInputComponent->BindAxis("LookUpRate", this, &AHouseWarriorsCharacter::LookUpAtRate);
+	PlayerInputComponent->BindAxis("LookUpRate", this, &AHouseWarriorsCharacter::LookUpAtRate);*/
 
 	// handle touch devices
 	PlayerInputComponent->BindTouch(IE_Pressed, this, &AHouseWarriorsCharacter::TouchStarted);
@@ -141,10 +136,6 @@ void AHouseWarriorsCharacter::MoveForward(float Value)
 {
 	if ((Controller != NULL) && (Value != 0.0f))
 	{
-		//Set follow camera use yaw
-		bUseControllerRotationYaw = true;
-		ChangeCameraMovementContraints(DynamicPitchMin, DynamicPitchMax);
-
 		// find out which way is forward
 		const FRotator Rotation = Controller->GetControlRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
@@ -153,19 +144,12 @@ void AHouseWarriorsCharacter::MoveForward(float Value)
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 		AddMovementInput(Direction, Value);
 	}
-
-	if (Value == 0.0f) {
-		//Set follow camera not use Yaw
-		bUseControllerRotationYaw = false;
-		ChangeCameraMovementContraints(StaticPitchMin, StaticPitchMax);
-	}
 }
 
 void AHouseWarriorsCharacter::MoveRight(float Value)
 {
 	if ( (Controller != NULL) && (Value != 0.0f) )
 	{
-		bUseControllerRotationYaw = true;
 		// find out which way is right
 		const FRotator Rotation = Controller->GetControlRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
@@ -174,7 +158,6 @@ void AHouseWarriorsCharacter::MoveRight(float Value)
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 		// add movement in that direction
 		AddMovementInput(Direction, Value);
-		AddControllerYawInput(Value * BaseTurnRate * GetWorld()->GetDeltaSeconds());
 	}
 }
 

@@ -31,19 +31,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
 		float BaseLookUpRate;
 
-	/*Camera movement pitch settings*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
-		float DynamicPitchMax;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
-		float DynamicPitchMin;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
-		float StaticPitchMin;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
-		float StaticPitchMax;
-
 	/*Health implementation settings*/
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = HealthDebug)
 		float RegenTimer;
@@ -134,9 +121,6 @@ protected:
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Interaction")
 		void Activate_Implementation(const AActor* ActorHit);
-
-	UFUNCTION(BlueprintImplementableEvent, Category = "Camera")
-		void ChangeCameraMovementContraints(const float& pitchMin, const float& pitchMax);
 
 	UFUNCTION(BlueprintNativeEvent, Category = "Interaction")
 		void OnHover();
