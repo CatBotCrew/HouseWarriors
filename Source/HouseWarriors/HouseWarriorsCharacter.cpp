@@ -173,15 +173,15 @@ void AHouseWarriorsCharacter::RunStop()
 
 void AHouseWarriorsCharacter::InteractPressed()
 {
-	if (bHitObject) {
-		AActor* Interactable = Hit.GetActor();
+	//if (bHitObject) {
+	//	AActor* Interactable = Hit.GetActor();
 
-		if (Interactable->ActorHasTag("Activator")) {
-			//DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 2.0f);
-			Activate_Implementation(Interactable);
-			OnHover();
-		}
-	}
+	//	if (Interactable->ActorHasTag("Activator")) {
+	//		//DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 2.0f);
+	//		Activate_Implementation(Interactable);
+	//		OnHover();
+	//	}
+	//}
 }
 
 void AHouseWarriorsCharacter::RegenerateHealth(float deltaTime)
