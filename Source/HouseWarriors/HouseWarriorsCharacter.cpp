@@ -12,6 +12,7 @@
 #include <EngineGlobals.h>
 #include <Runtime/Engine/Classes/Engine/Engine.h>
 #include "Kismet/GameplayStatics.h"
+#include "Interactable.h"
 
 //////////////////////////////////////////////////////////////////////////
 // AHouseWarriorsCharacter
@@ -30,7 +31,6 @@ AHouseWarriorsCharacter::AHouseWarriorsCharacter()
 	WalkSpeed = 100.0f;
 
 	//Other settings
-	bHitObject = false;
 	bIsRegeneratingHealth = false;
 	MaxHealth = 100;
 	MaxRegenTimer = 10.0f; //in seconds
@@ -39,8 +39,11 @@ AHouseWarriorsCharacter::AHouseWarriorsCharacter()
 	RegenTimer = 0.0f; //in seconds
 	CountDownUntilRegen = MaxCountDownUntilRegen; //in seconds
 	HealthPlusPerSeconds = 10;
-	TraceDistance = 1000.0f;
 	currentUIValue = 0.0f;
+
+	//Interactble variables
+	MinAngleToInteractable = 30.0f;
+	MaxDistanceToInteract = 300.0f;
 
 	// Don't rotate when the controller rotates. Let that just affect the camera.
 	bUseControllerRotationPitch = false;
@@ -82,8 +85,6 @@ void AHouseWarriorsCharacter::SetupPlayerInputComponent(class UInputComponent* P
 	
 	PlayerInputComponent->BindAction("Run", IE_Pressed, this, &AHouseWarriorsCharacter::Run);
 	PlayerInputComponent->BindAction("Run", IE_Released, this, &AHouseWarriorsCharacter::RunStop);
-
-	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &AHouseWarriorsCharacter::InteractPressed);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &AHouseWarriorsCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AHouseWarriorsCharacter::MoveRight);
@@ -171,19 +172,6 @@ void AHouseWarriorsCharacter::RunStop()
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 }
 
-void AHouseWarriorsCharacter::InteractPressed()
-{
-	//if (bHitObject) {
-	//	AActor* Interactable = Hit.GetActor();
-
-	//	if (Interactable->ActorHasTag("Activator")) {
-	//		//DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 2.0f);
-	//		Activate_Implementation(Interactable);
-	//		OnHover();
-	//	}
-	//}
-}
-
 void AHouseWarriorsCharacter::RegenerateHealth(float deltaTime)
 {
 	RegenTimer -= deltaTime;
@@ -197,21 +185,6 @@ void AHouseWarriorsCharacter::RegenerateHealth(float deltaTime)
 			RegenTimer = 0.0f;
 		}
 	}
-}
-
-void AHouseWarriorsCharacter::Interact_Implementation()
-{
-	FVector Location;
-	FRotator Rotation;
-
-	GetController()->GetPlayerViewPoint(Location, Rotation);
-
-	Start = Location;
-	End = Start + (Rotation.Vector() * TraceDistance);
-
-	FCollisionQueryParams TraceParams;
-	bHitObject = GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility, TraceParams);
-	//DrawDebugLine(GetWorld(), Start, End, FColor::Cyan, false, 1.0f);
 }
 
 void AHouseWarriorsCharacter::CanRegenerateHealth(float deltaTime)

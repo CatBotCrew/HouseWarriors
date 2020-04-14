@@ -67,9 +67,6 @@ protected:
 	void Run();
 	void RunStop();
 
-	/*Called for interacting with specific objects in the scene*/
-	void InteractPressed();
-
 	/*Health regeneration over time*/
 	void RegenerateHealth(float deltaTime);
 
@@ -99,12 +96,12 @@ protected:
 	UPROPERTY(Category = "Character Movement: Walking", EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "0", UIMin = "0"))
 		float WalkSpeed;
 
-	/** The trace channel distance */
+	/** The interact distance */
 	UPROPERTY(Category = "Interaction", EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "0", UIMin = "0"))
-		float TraceDistance;
+		float MaxDistanceToInteract;
 
-	UFUNCTION(BlueprintCallable, Category = "Interaction")
-		void Interact_Implementation();
+	UPROPERTY(Category = "Interaction", EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "0", UIMin = "0"))
+		float MinAngleToInteractable;
 
 	UFUNCTION(BlueprintCallable, Category = "Health")
 		void CanRegenerateHealth(float deltaTime);
@@ -119,9 +116,6 @@ protected:
 		void OnDeath();
 		void OnDeath_Implementation();
 
-	UFUNCTION(BlueprintImplementableEvent, Category = "Interaction")
-		void Activate_Implementation(const AActor* ActorHit);
-
 	UFUNCTION(BlueprintNativeEvent, Category = "Interaction")
 		void OnHover();
 		void OnHover_Implementation();
@@ -134,18 +128,10 @@ protected:
 
 private:
 	/*booleans for use in this h & cpp and not anywhere else*/
-	bool bHitObject;
 	bool bIsRegeneratingHealth;
 
 	/*private float values*/
 	float currentUIValue;
-
-	/*Trace by channel*/
-	FVector Start;
-	FVector End;
-	AActor* Interactable;
-	FHitResult Hit;
-	AActor* FocusedInteractable;
 
 public:
 	/** Returns CameraBoom subobject **/
